@@ -195,11 +195,73 @@ func TestDynamicRoute(t *testing.T) {
 
 	for _, v := range cases {
 		t.Run(v.testName, func(t *testing.T) {
-			p := ReqParams(v.reqUrl)
+			p := ReqParams(v.reqUrl, v.paramName)
 
-			if p(v.paramName) != v.param {
+			if p != v.param {
 				t.Fatal(v.regUrl)
 			}
 		})
+	}
+}
+
+func BenchmarkDynamicRoute(b *testing.B) {
+	Routes = make(map[string]RouteChild)
+	HandlerGET("/:id", getOne)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i <= b.N; i++ {
+		_ = ReqParams("/1", "id")
+	}
+}
+
+func BenchmarkDynamicRoute5(b *testing.B) {
+	Routes = make(map[string]RouteChild)
+
+	regUrl := "/:a/:b/:c/:d/:e"
+	reqUrl := "/1/2/3/4/5"
+	HandlerGET(regUrl, getOne)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i <= b.N; i++ {
+		_ = ReqParams(reqUrl, "a")
+		_ = ReqParams(reqUrl, "b")
+		_ = ReqParams(reqUrl, "c")
+		_ = ReqParams(reqUrl, "d")
+		_ = ReqParams(reqUrl, "e")
+	}
+}
+
+func BenchmarkDynamicRoute20(b *testing.B) {
+	Routes = make(map[string]RouteChild)
+
+	regUrl := "/:a/:b/:c/:d/:e/:f/:g/:h/:i/:j/:k/:l/:m/:n/:o/:p/:q/:r/:s/:t"
+	reqUrl := "/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20"
+	HandlerGET(regUrl, getOne)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i <= b.N; i++ {
+		_ = ReqParams(reqUrl, "a")
+		_ = ReqParams(reqUrl, "b")
+		_ = ReqParams(reqUrl, "c")
+		_ = ReqParams(reqUrl, "d")
+		_ = ReqParams(reqUrl, "e")
+		_ = ReqParams(reqUrl, "f")
+		_ = ReqParams(reqUrl, "g")
+		_ = ReqParams(reqUrl, "h")
+		_ = ReqParams(reqUrl, "i")
+		_ = ReqParams(reqUrl, "j")
+		_ = ReqParams(reqUrl, "k")
+		_ = ReqParams(reqUrl, "l")
+		_ = ReqParams(reqUrl, "m")
+		_ = ReqParams(reqUrl, "n")
+		_ = ReqParams(reqUrl, "o")
+		_ = ReqParams(reqUrl, "p")
+		_ = ReqParams(reqUrl, "q")
+		_ = ReqParams(reqUrl, "r")
+		_ = ReqParams(reqUrl, "s")
+		_ = ReqParams(reqUrl, "t")
 	}
 }

@@ -1,4 +1,5 @@
-`gosrouter` stands for Go Simple Router, which was made to sufficient author need to get dynamic params at [author Back-End project](https://github.com/fikryfahrezy/gobookshelf) when author learning Go for the first time.
+`gosrouter` stands for Go Simple Router, which was made to sufficient author need to get dynamic params
+at [author Back-End project](https://github.com/fikryfahrezy/gobookshelf) when author learning Go for the first time.
 
 ## Install
 
@@ -24,8 +25,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 }
 
 func delete(w http.ResponseWriter, r *http.Request) {
-	p := gosrouter.ReqParams(r.URL.Path)
-	id := p("id")
+	id := gosrouter.ReqParams(r.URL.Path, "id")
 
 	if id == "" {
 		w.Write([]byte("id required"))
@@ -36,8 +36,7 @@ func delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func put(w http.ResponseWriter, r *http.Request) {
-	p := gosrouter.ReqParams(r.URL.Path)
-	x := p("x")
+	x := gosrouter.ReqParams(r.URL.Path, "x")
 
 	if x == "" {
 		w.Write([]byte("x required"))
@@ -48,8 +47,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 }
 
 func patch(w http.ResponseWriter, r *http.Request) {
-	p := gosrouter.ReqParams(r.URL.Path)
-	id := p("id")
+	id := gosrouter.ReqParams(r.URL.Path, "id")
 
 	if id == "" {
 		w.Write([]byte("id required"))
@@ -74,6 +72,19 @@ func main() {
 }
 ```
 
+## Benchmark
+```
+go test -bench=. -gcflags -m ./...
+
+goos: windows
+goarch: amd64
+pkg: github.com/fikryfahrezy/gosrouter
+cpu: Intel(R) Core(TM) i5-8265U CPU @ 1.60GHz
+BenchmarkDynamicRoute-8          4967024               249.6 ns/op            67 B/op          3 allocs/op
+BenchmarkDynamicRoute5-8          394708              2937 ns/op            1040 B/op         25 allocs/op
+BenchmarkDynamicRoute20-8          33561             35093 ns/op           15360 B/op        250 allocs/op
+```
+
 ## License
 
-Free to use for any projects.
+MIT

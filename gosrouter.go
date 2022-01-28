@@ -14,10 +14,6 @@ type RouteChild struct {
 	Child   *RouteChild
 }
 
-func (r *RouteChild) GetChild() RouteChild {
-	return *r.Child
-}
-
 var routeMethods = map[string]string{
 	"GET":    http.MethodGet,
 	"POST":   http.MethodPost,
@@ -193,7 +189,7 @@ func ReqParams(u, p string) string {
 		if i == 0 {
 			if r := Routes[v]; r.Route == "" {
 				lt := Routes["/"]
-				l = lt.GetChild()
+				l = *lt.Child
 				isSls = true
 			} else {
 				l = r
@@ -208,7 +204,7 @@ func ReqParams(u, p string) string {
 		}
 
 		if l.Child != nil {
-			l = l.GetChild()
+			l = *l.Child
 		}
 	}
 

@@ -1,6 +1,7 @@
-package gosrouter
+package v1_test
 
 import (
+	gosrouter "github.com/fikryfahrezy/gosrouter/v1"
 	"net/http"
 	"reflect"
 	"testing"
@@ -31,7 +32,7 @@ func deleteOne(w http.ResponseWriter, r *http.Request) {}
 func deleteTwo(w http.ResponseWriter, r *http.Request) {}
 
 func TestGetRoute(t *testing.T) {
-	Routes = make(map[string]RouteChild)
+	gosrouter.Routes = make(map[string]gosrouter.RouteChild)
 
 	cases := []struct {
 		testName, regUrl, reqUrl, mtd string
@@ -43,7 +44,7 @@ func TestGetRoute(t *testing.T) {
 			"/",
 			"/",
 			"POST",
-			HandlerPOST,
+			gosrouter.HandlerPOST,
 			postOne,
 		},
 		{
@@ -51,7 +52,7 @@ func TestGetRoute(t *testing.T) {
 			"/",
 			"/",
 			"GET",
-			HandlerGET,
+			gosrouter.HandlerGET,
 			getOne,
 		},
 		{
@@ -59,7 +60,7 @@ func TestGetRoute(t *testing.T) {
 			"/:id",
 			"/1",
 			"POST",
-			HandlerPOST,
+			gosrouter.HandlerPOST,
 			postTwo,
 		},
 		{
@@ -67,7 +68,7 @@ func TestGetRoute(t *testing.T) {
 			"/:id",
 			"/1",
 			"GET",
-			HandlerGET,
+			gosrouter.HandlerGET,
 			getTwo,
 		},
 		{
@@ -75,7 +76,7 @@ func TestGetRoute(t *testing.T) {
 			"/:id",
 			"/1",
 			"PUT",
-			HandlerPUT,
+			gosrouter.HandlerPUT,
 			putOne,
 		},
 		{
@@ -83,7 +84,7 @@ func TestGetRoute(t *testing.T) {
 			"/:id",
 			"/1",
 			"DELETE",
-			HandlerDELETE,
+			gosrouter.HandlerDELETE,
 			deleteOne,
 		},
 		{
@@ -91,7 +92,7 @@ func TestGetRoute(t *testing.T) {
 			"/one",
 			"/one",
 			"POST",
-			HandlerPOST,
+			gosrouter.HandlerPOST,
 			postThree,
 		},
 		{
@@ -99,7 +100,7 @@ func TestGetRoute(t *testing.T) {
 			"/one",
 			"/one",
 			"GET",
-			HandlerGET,
+			gosrouter.HandlerGET,
 			getThree,
 		},
 		{
@@ -107,7 +108,7 @@ func TestGetRoute(t *testing.T) {
 			"/one/:id",
 			"/one/1",
 			"POST",
-			HandlerPOST,
+			gosrouter.HandlerPOST,
 			postFour,
 		},
 		{
@@ -115,7 +116,7 @@ func TestGetRoute(t *testing.T) {
 			"/one/:id",
 			"/one/1",
 			"GET",
-			HandlerGET,
+			gosrouter.HandlerGET,
 			getFour,
 		},
 		{
@@ -123,7 +124,7 @@ func TestGetRoute(t *testing.T) {
 			"/one/:id",
 			"/one/1",
 			"PUT",
-			HandlerPUT,
+			gosrouter.HandlerPUT,
 			putTwo,
 		},
 		{
@@ -131,7 +132,7 @@ func TestGetRoute(t *testing.T) {
 			"/one/:id",
 			"/one/1",
 			"DELETE",
-			HandlerDELETE,
+			gosrouter.HandlerDELETE,
 			deleteTwo,
 		},
 	}
@@ -142,7 +143,7 @@ func TestGetRoute(t *testing.T) {
 
 	for _, v := range cases {
 		t.Run(v.testName, func(t *testing.T) {
-			if rt := getRoute(v.reqUrl, v.mtd); reflect.ValueOf(rt).Pointer() != reflect.ValueOf(v.fn).Pointer() {
+			if rt := gosrouter.GetRoute(v.reqUrl, v.mtd); reflect.ValueOf(rt).Pointer() != reflect.ValueOf(v.fn).Pointer() {
 				t.Fatal(v.regUrl)
 			}
 		})
@@ -150,7 +151,7 @@ func TestGetRoute(t *testing.T) {
 }
 
 func TestDynamicRoute(t *testing.T) {
-	Routes = make(map[string]RouteChild)
+	gosrouter.Routes = make(map[string]gosrouter.RouteChild)
 
 	cases := []struct {
 		testName, regUrl, reqUrl, paramName, param, mtd string
@@ -164,7 +165,7 @@ func TestDynamicRoute(t *testing.T) {
 			"id",
 			"1",
 			"GET",
-			HandlerGET,
+			gosrouter.HandlerGET,
 			getOne,
 		},
 		{
@@ -174,7 +175,7 @@ func TestDynamicRoute(t *testing.T) {
 			"x",
 			"11",
 			"GET",
-			HandlerGET,
+			gosrouter.HandlerGET,
 			getOne,
 		},
 		{
@@ -184,7 +185,7 @@ func TestDynamicRoute(t *testing.T) {
 			"xy",
 			"xyz",
 			"GET",
-			HandlerGET,
+			gosrouter.HandlerGET,
 			getOne,
 		},
 	}
@@ -195,7 +196,7 @@ func TestDynamicRoute(t *testing.T) {
 
 	for _, v := range cases {
 		t.Run(v.testName, func(t *testing.T) {
-			p := ReqParams(v.reqUrl, v.paramName)
+			p := gosrouter.ReqParams(v.reqUrl, v.paramName)
 
 			if p != v.param {
 				t.Fatal(v.regUrl)
@@ -205,63 +206,63 @@ func TestDynamicRoute(t *testing.T) {
 }
 
 func BenchmarkDynamicRoute(b *testing.B) {
-	Routes = make(map[string]RouteChild)
-	HandlerGET("/:id", getOne)
+	gosrouter.Routes = make(map[string]gosrouter.RouteChild)
+	gosrouter.HandlerGET("/:id", getOne)
 
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i <= b.N; i++ {
-		_ = ReqParams("/1", "id")
+		_ = gosrouter.ReqParams("/1", "id")
 	}
 }
 
 func BenchmarkDynamicRoute5(b *testing.B) {
-	Routes = make(map[string]RouteChild)
+	gosrouter.Routes = make(map[string]gosrouter.RouteChild)
 
 	regUrl := "/:a/:b/:c/:d/:e"
 	reqUrl := "/1/2/3/4/5"
-	HandlerGET(regUrl, getOne)
+	gosrouter.HandlerGET(regUrl, getOne)
 
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i <= b.N; i++ {
-		_ = ReqParams(reqUrl, "a")
-		_ = ReqParams(reqUrl, "b")
-		_ = ReqParams(reqUrl, "c")
-		_ = ReqParams(reqUrl, "d")
-		_ = ReqParams(reqUrl, "e")
+		_ = gosrouter.ReqParams(reqUrl, "a")
+		_ = gosrouter.ReqParams(reqUrl, "b")
+		_ = gosrouter.ReqParams(reqUrl, "c")
+		_ = gosrouter.ReqParams(reqUrl, "d")
+		_ = gosrouter.ReqParams(reqUrl, "e")
 	}
 }
 
 func BenchmarkDynamicRoute20(b *testing.B) {
-	Routes = make(map[string]RouteChild)
+	gosrouter.Routes = make(map[string]gosrouter.RouteChild)
 
 	regUrl := "/:a/:b/:c/:d/:e/:f/:g/:h/:i/:j/:k/:l/:m/:n/:o/:p/:q/:r/:s/:t"
 	reqUrl := "/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20"
-	HandlerGET(regUrl, getOne)
+	gosrouter.HandlerGET(regUrl, getOne)
 
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i <= b.N; i++ {
-		_ = ReqParams(reqUrl, "a")
-		_ = ReqParams(reqUrl, "b")
-		_ = ReqParams(reqUrl, "c")
-		_ = ReqParams(reqUrl, "d")
-		_ = ReqParams(reqUrl, "e")
-		_ = ReqParams(reqUrl, "f")
-		_ = ReqParams(reqUrl, "g")
-		_ = ReqParams(reqUrl, "h")
-		_ = ReqParams(reqUrl, "i")
-		_ = ReqParams(reqUrl, "j")
-		_ = ReqParams(reqUrl, "k")
-		_ = ReqParams(reqUrl, "l")
-		_ = ReqParams(reqUrl, "m")
-		_ = ReqParams(reqUrl, "n")
-		_ = ReqParams(reqUrl, "o")
-		_ = ReqParams(reqUrl, "p")
-		_ = ReqParams(reqUrl, "q")
-		_ = ReqParams(reqUrl, "r")
-		_ = ReqParams(reqUrl, "s")
-		_ = ReqParams(reqUrl, "t")
+		_ = gosrouter.ReqParams(reqUrl, "a")
+		_ = gosrouter.ReqParams(reqUrl, "b")
+		_ = gosrouter.ReqParams(reqUrl, "c")
+		_ = gosrouter.ReqParams(reqUrl, "d")
+		_ = gosrouter.ReqParams(reqUrl, "e")
+		_ = gosrouter.ReqParams(reqUrl, "f")
+		_ = gosrouter.ReqParams(reqUrl, "g")
+		_ = gosrouter.ReqParams(reqUrl, "h")
+		_ = gosrouter.ReqParams(reqUrl, "i")
+		_ = gosrouter.ReqParams(reqUrl, "j")
+		_ = gosrouter.ReqParams(reqUrl, "k")
+		_ = gosrouter.ReqParams(reqUrl, "l")
+		_ = gosrouter.ReqParams(reqUrl, "m")
+		_ = gosrouter.ReqParams(reqUrl, "n")
+		_ = gosrouter.ReqParams(reqUrl, "o")
+		_ = gosrouter.ReqParams(reqUrl, "p")
+		_ = gosrouter.ReqParams(reqUrl, "q")
+		_ = gosrouter.ReqParams(reqUrl, "r")
+		_ = gosrouter.ReqParams(reqUrl, "s")
+		_ = gosrouter.ReqParams(reqUrl, "t")
 	}
 }

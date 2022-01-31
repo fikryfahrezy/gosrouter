@@ -13,7 +13,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/fikryfahrezy/gosrouter"
+	gosrouter "github.com/fikryfahrezy/gosrouter/v1"
 )
 
 func post(w http.ResponseWriter, r *http.Request) {

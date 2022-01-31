@@ -1,4 +1,4 @@
-package gosrouter
+package v1
 
 import (
 	"fmt"
@@ -123,7 +123,7 @@ func HandlerPATCH(url string, fn http.HandlerFunc) {
 	registerHandler("PATCH", url, fn)
 }
 
-func getRoute(url, mtd string) func(http.ResponseWriter, *http.Request) {
+func GetRoute(url, mtd string) func(http.ResponseWriter, *http.Request) {
 	if r := Routes[url]; r.Route == url && r.Fn[mtd] != nil {
 		return r.Fn[mtd]
 	}
@@ -168,7 +168,7 @@ func MakeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rt := getRoute(r.URL.Path, m)
+	rt := GetRoute(r.URL.Path, m)
 
 	if rt == nil {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)

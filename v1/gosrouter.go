@@ -161,22 +161,17 @@ func GetRoute(url, mtd string) func(http.ResponseWriter, *http.Request) {
 
 func MakeHandler(w http.ResponseWriter, r *http.Request) {
 	m := routeMethods[strings.ToUpper(r.Method)]
-
 	if m == "" {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-
 		return
 	}
 
-	rt := GetRoute(r.URL.Path, m)
-
-	if rt == nil {
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-
+	if rt := GetRoute(r.URL.Path, m); rt != nil {
+		rt(w, r)
 		return
 	}
 
-	rt(w, r)
+	http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 }
 
 func ReqParams(u, p string) string {

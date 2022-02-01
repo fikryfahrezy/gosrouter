@@ -1,4 +1,4 @@
-package v2
+package exp2
 
 import (
 	"fmt"
@@ -14,6 +14,14 @@ type RoutesChild struct {
 
 type RouteChildV2 map[string]RoutesChild
 
+var routeMethods = map[string]string{
+	"GET":    http.MethodGet,
+	"POST":   http.MethodPost,
+	"PUT":    http.MethodPut,
+	"DELETE": http.MethodDelete,
+	"PATCH":  http.MethodPatch,
+}
+
 var Routes RouteChildV2
 
 func Handler(mtd, url string, handler http.HandlerFunc) {
@@ -24,6 +32,7 @@ func Handler(mtd, url string, handler http.HandlerFunc) {
 	}
 
 	var s strings.Builder
+	s.WriteString("^")
 	us := make([]string, urlsLen)
 	prs := make([]string, urlsLen)
 	if url == "/" {
@@ -44,6 +53,7 @@ func Handler(mtd, url string, handler http.HandlerFunc) {
 		}
 	}
 
+	s.WriteString("$")
 	ss := s.String()
 
 	if _, ok := Routes[ss]; !ok {
@@ -57,7 +67,7 @@ func Handler(mtd, url string, handler http.HandlerFunc) {
 	Routes[ss].Child[mtd] = handler
 }
 
-func URLParam(url, p string) string {
+func ReqParams(url, p string) string {
 	urls := strings.Split(url, "/")[1:]
 
 	for k, v := range Routes {
@@ -98,7 +108,19 @@ func HandlerDELETE(url string, handler http.HandlerFunc) {
 }
 
 func GetRoute(url, mtd string) http.HandlerFunc {
+	m := strings.ToUpper(mtd)
+
 	var rc RoutesChild
+	rc, ok := Routes["^"+url+"$"]
+	if ok && rc.Child != nil {
+		route, ok := rc.Child[m]
+		if !ok {
+			return nil
+		}
+
+		return route
+	}
+
 	for k, v := range Routes {
 		matched, err := regexp.MatchString(k, url)
 		if err != nil || !matched {
@@ -108,7 +130,7 @@ func GetRoute(url, mtd string) http.HandlerFunc {
 	}
 
 	if rc.Child != nil {
-		route, ok := rc.Child[strings.ToUpper(mtd)]
+		route, ok := rc.Child[m]
 		if !ok {
 			return nil
 		}
@@ -119,13 +141,17 @@ func GetRoute(url, mtd string) http.HandlerFunc {
 	return nil
 }
 
-func MakeHandler(w http.ResponseWriter, rq *http.Request) {
-	url := rq.URL.Path
+func MakeHandler(w http.ResponseWriter, r *http.Request) {
+	m := routeMethods[strings.ToUpper(r.Method)]
+	if m == "" {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
 
-	if route := GetRoute(url, rq.Method); route != nil {
-		route(w, rq)
+	if route := GetRoute(r.URL.Path, m); route != nil {
+		route(w, r)
+		return
 	}
 
 	http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-	return
 }

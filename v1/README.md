@@ -73,6 +73,7 @@ func main() {
 ```
 
 ## Benchmark
+
 ```
 go test -bench=. -gcflags -m ./...
 

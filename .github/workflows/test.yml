@@ -18,8 +18,7 @@ jobs:
 
       - name: Build
         run: |
-          go build ./v1
-          go build ./v2
+          go build ./...
         env:
           GOPROXY: 'https://proxy.golang.org'
 
